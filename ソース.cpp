@@ -11,7 +11,13 @@
 
 #define GAME_FPS			60	//FPSの数値	
 
-#define IMAGE_TITLE_BK_PATH ("IMAGE.\\タイトル背景参考.jpg")
+#define IMAGE_TITLE_BK_PATH ("IMAGE.\\タイトル背景参考.png")
+#define IMAGE_TITLE_ROGO_PATH  ("IMAGE.\\Dissapeared.png")
+#define IMAGE_TITLE_PUSH_PATH  ("IMAGE.\\タイトルpush.png")
+
+#define IMAGE_END_BK_PATH  ("IMAGE.\\エンド参考.jpg")
+
+#define IMAGE_CHARA        ("IMAGE.\\村娘.png")
 
 //マウスのボタン
 #define MOUSE_BUTTON_CODE	129	//0x0000～0x0080まで
@@ -41,6 +47,15 @@ enum GAME_SCENE {
 	GAME_SCENE_PLAY,
 	GAME_SCENE_END,
 };	//ゲームのシーン
+
+enum GAME_CHARA 
+{
+
+	n = -1,
+	s = 1
+
+
+};
 
 //int型のPOINT構造体
 typedef struct STRUCT_I_POINT
@@ -86,6 +101,8 @@ typedef struct STRUCT_CHARA
 	iPOINT collBeforePt;		//当たる前の座標
 
 }CHARA;	//キャラクター構造体
+
+
 
 //########## グローバル変数 ##########
 //FPS関連
@@ -142,6 +159,10 @@ BOOL MY_LOAD_MUSIC(VOID);		//音楽をまとめて読み込む関数
 VOID MY_DELETE_MUSIC(VOID);		//音楽をまとめて削除する関数
 
 IMAGE ImageTitleBK;
+IMAGE ImageTitleROGO;
+IMAGE ImageTitlePUSH;
+
+IMAGE ImageEndBK;
 
 //########## プログラムで最初に実行される関数 ##########
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
@@ -455,6 +476,10 @@ VOID MY_START_DRAW(VOID)
 {
 	DrawGraph(ImageTitleBK.x, ImageTitleBK.y, ImageTitleBK.handle, TRUE);
 
+	DrawGraph(ImageTitleROGO.x, ImageTitleROGO.y, ImageTitleROGO.handle, TRUE);
+
+	DrawGraph(ImageTitlePUSH.x, ImageTitlePUSH.y, ImageTitlePUSH.handle, TRUE);
+
 	return;
 }
 
@@ -523,6 +548,7 @@ VOID MY_END_PROC(VOID)
 //エンド画面の描画
 VOID MY_END_DRAW(VOID)
 {
+	DrawGraph(ImageEndBK.x, ImageEndBK.y, ImageEndBK.handle, TRUE);
 
 	return;
 }
@@ -538,11 +564,41 @@ BOOL MY_LOAD_IMAGE(VOID)
 	}
 
 	GetGraphSize(ImageTitleBK.handle, &ImageTitleBK.width, &ImageTitleBK.height);
-	ImageTitleBK.width *= 2;
-	ImageTitleBK.height *= 2;
 	ImageTitleBK.x = GAME_WIDTH / 2 - ImageTitleBK.width / 2;
 	ImageTitleBK.y = GAME_HEIGHT / 2 - ImageTitleBK.height / 2;
 
+	strcpy(ImageTitleROGO.path, IMAGE_TITLE_ROGO_PATH);
+	ImageTitleROGO.handle = LoadGraph(ImageTitleROGO.path);
+	if (ImageTitleROGO.handle == -1)
+	{
+		MessageBox(GetMainWindowHandle(), IMAGE_TITLE_ROGO_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	}
+
+	GetGraphSize(ImageTitleROGO.handle, &ImageTitleROGO.width, &ImageTitleROGO.height);
+	ImageTitleROGO.x = GAME_WIDTH / 2 - ImageTitleROGO.width / 2;
+	ImageTitleROGO.y = GAME_HEIGHT / 2 - ImageTitleROGO.height / 2;
+
+	strcpy(ImageTitlePUSH.path, IMAGE_TITLE_PUSH_PATH);
+	ImageTitlePUSH.handle = LoadGraph(ImageTitlePUSH.path);
+	if (ImageTitlePUSH.handle == -1)
+	{
+		MessageBox(GetMainWindowHandle(), IMAGE_TITLE_PUSH_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	}
+
+	GetGraphSize(ImageTitlePUSH.handle, &ImageTitlePUSH.width, &ImageTitlePUSH.height);
+	ImageTitlePUSH.x = GAME_WIDTH / 2 - ImageTitlePUSH.width / 2;
+	ImageTitlePUSH.y = GAME_HEIGHT / 2 - ImageTitlePUSH.height / 2;
+
+	strcpy(ImageEndBK.path, IMAGE_END_BK_PATH);
+	ImageEndBK.handle = LoadGraph(ImageEndBK.path);
+	if (ImageEndBK.handle == -1)
+	{
+		MessageBox(GetMainWindowHandle(), IMAGE_END_BK_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	}
+
+	GetGraphSize(ImageEndBK.handle, &ImageEndBK.width, &ImageEndBK.height);
+	ImageEndBK.x = GAME_WIDTH / 2 - ImageEndBK.width / 2;
+	ImageEndBK.y = GAME_HEIGHT / 2 - ImageEndBK.height / 2;
 
 
 	return TRUE;
