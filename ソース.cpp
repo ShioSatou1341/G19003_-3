@@ -11,13 +11,16 @@
 
 #define GAME_FPS			60	//FPSの数値	
 
-#define IMAGE_TITLE_BK_PATH ("IMAGE.\\タイトル背景参考.png")
+#define IMAGE_TITLE_BK_PATH    ("IMAGE.\\タイトル背景参考.png")
 #define IMAGE_TITLE_ROGO_PATH  ("IMAGE.\\Dissapeared.png")
 #define IMAGE_TITLE_PUSH_PATH  ("IMAGE.\\タイトルpush.png")
 
-#define IMAGE_END_BK_PATH  ("IMAGE.\\エンド参考.jpg")
+#define IMAGE_END_BK_PATH      ("IMAGE.\\エンド参考.jpg")
+#define IMAGE_END_PUSH_PATH    ("ImAGE.\\クリアロゴ.png")
 
-#define IMAGE_CHARA        ("IMAGE.\\村娘.png")
+#define IMAGE_MAP_PATH         ("IMAGE.\\space.png")
+
+#define IMAGE_CHARA            ("IMAGE.\\村娘.png")
 
 //マウスのボタン
 #define MOUSE_BUTTON_CODE	129	//0x0000～0x0080まで
@@ -162,7 +165,10 @@ IMAGE ImageTitleBK;
 IMAGE ImageTitleROGO;
 IMAGE ImageTitlePUSH;
 
+
+
 IMAGE ImageEndBK;
+IMAGE ImageEndPush;
 
 //########## プログラムで最初に実行される関数 ##########
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
@@ -449,7 +455,6 @@ VOID MY_START(VOID)
 	MY_START_PROC();	//スタート画面の処理
 	MY_START_DRAW();	//スタート画面の描画
 
-
 	DrawString(0, 0, "スタート画面(エンターキーを押して下さい)", GetColor(255, 255, 255));
 	return;
 }
@@ -518,6 +523,14 @@ VOID MY_PLAY_PROC(VOID)
 //プレイ画面の描画
 VOID MY_PLAY_DRAW(VOID)
 {
+	int image[12];
+
+	
+	LoadDivGraph("IMAGE.\\村娘.png", 12, 3, 4, 24, 48, image);
+
+	DrawGraph(0, 0, image[1], TRUE);
+
+	
 
 	return;
 }
@@ -549,6 +562,7 @@ VOID MY_END_PROC(VOID)
 VOID MY_END_DRAW(VOID)
 {
 	DrawGraph(ImageEndBK.x, ImageEndBK.y, ImageEndBK.handle, TRUE);
+	DrawGraph(ImageEndPush.x, ImageEndPush.y, ImageEndPush.handle, TRUE);
 
 	return;
 }
@@ -589,6 +603,8 @@ BOOL MY_LOAD_IMAGE(VOID)
 	ImageTitlePUSH.x = GAME_WIDTH / 2 - ImageTitlePUSH.width / 2;
 	ImageTitlePUSH.y = GAME_HEIGHT / 2 - ImageTitlePUSH.height / 2;
 
+	
+
 	strcpy(ImageEndBK.path, IMAGE_END_BK_PATH);
 	ImageEndBK.handle = LoadGraph(ImageEndBK.path);
 	if (ImageEndBK.handle == -1)
@@ -599,6 +615,17 @@ BOOL MY_LOAD_IMAGE(VOID)
 	GetGraphSize(ImageEndBK.handle, &ImageEndBK.width, &ImageEndBK.height);
 	ImageEndBK.x = GAME_WIDTH / 2 - ImageEndBK.width / 2;
 	ImageEndBK.y = GAME_HEIGHT / 2 - ImageEndBK.height / 2;
+
+	strcpy(ImageEndPush.path, IMAGE_END_PUSH_PATH);
+	ImageEndPush.handle = LoadGraph(ImageEndPush.path);
+	if (ImageEndPush.handle == -1)
+	{
+		MessageBox(GetMainWindowHandle(), IMAGE_END_PUSH_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	}
+
+	GetGraphSize(ImageEndPush.handle, &ImageEndPush.width, &ImageEndPush.height);
+	ImageEndPush.x = GAME_WIDTH / 2 - ImageEndPush.width / 2;
+	ImageEndPush.y = GAME_HEIGHT / 2 - ImageEndPush.height / 2;
 
 
 	return TRUE;
