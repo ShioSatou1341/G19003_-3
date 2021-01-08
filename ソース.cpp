@@ -48,6 +48,7 @@
 enum GAME_SCENE {
 	GAME_SCENE_START,
 	GAME_SCENE_PLAY,
+	GAME_SCENE_MENU,
 	GAME_SCENE_END,
 };	//ÉQÅ[ÉÄÇÃÉVÅ[Éì
 
@@ -526,7 +527,7 @@ VOID MY_PLAY_DRAW(VOID)
 	int image[12];
 
 	
-	LoadDivGraph("IMAGE.\\ë∫ñ∫.png", 12, 3, 4, 24, 48, image);
+	LoadDivGraph("IMAGE.\\ë∫ñ∫.png", 12, 3, 4, 18, 48, image);
 
 	DrawGraph(0, 0, image[1], TRUE);
 
