@@ -15,6 +15,10 @@
 #define IMAGE_TITLE_ROGO_PATH  ("IMAGE.\\Dissapeared.png")
 #define IMAGE_TITLE_PUSH_PATH  ("IMAGE.\\タイトルpush.png")
 
+#define IMAGE_PLAY_MAP_PATH
+
+#define IMAGE_MENU_BK_PATH     ("IMAGE.\\space1.png")
+
 #define IMAGE_END_BK_PATH      ("IMAGE.\\エンド参考.jpg")
 #define IMAGE_END_PUSH_PATH    ("ImAGE.\\クリアロゴ.png")
 
@@ -43,6 +47,9 @@
 #define MSG_CLOSE_CAPTION		TEXT("ゲームを終了しますか？")
 
 #define IDI_ICON1	1001
+
+#define MSG_TITLE_BACK          TEXT("ゲーム中断")
+#define MSG_TITLE_BACK_MESSAGE  TEXT("タイトルにもどりますか？")
 
 
 enum GAME_SCENE {
@@ -152,6 +159,10 @@ VOID MY_PLAY(VOID);			//プレイ画面
 VOID MY_PLAY_PROC(VOID);	//プレイ画面の処理
 VOID MY_PLAY_DRAW(VOID);	//プレイ画面の描画
 
+VOID MY_MENU(VOID);
+VOID MY_MENU_PROC(VOID);
+VOID MY_MENU_DRAW(VOID);
+
 VOID MY_END(VOID);			//エンド画面
 VOID MY_END_PROC(VOID);		//エンド画面の処理
 VOID MY_END_DRAW(VOID);		//エンド画面の描画
@@ -166,7 +177,7 @@ IMAGE ImageTitleBK;
 IMAGE ImageTitleROGO;
 IMAGE ImageTitlePUSH;
 
-
+IMAGE ImageMenuBK;
 
 IMAGE ImageEndBK;
 IMAGE ImageEndPush;
@@ -222,6 +233,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			break;
 		case GAME_SCENE_PLAY:
 			MY_PLAY();	//プレイ画面
+			break;
+		case GAME_SCENE_MENU: 
+			MY_MENU();  //メニュー画面
 			break;
 		case GAME_SCENE_END:
 			MY_END();	//エンド画面
@@ -518,21 +532,78 @@ VOID MY_PLAY_PROC(VOID)
 		return;
 	}
 
+	if (MY_KEY_DOWN(KEY_INPUT_M) == TRUE)
+	{
+		GameScene = GAME_SCENE_MENU;
+		
+		return;
+	}
+
+	if (MY_KEY_DOWN(KEY_INPUT_S) == TRUE)
+	{
+		int Ret = MessageBox(GetMainWindowHandle(), MSG_TITLE_BACK, MSG_TITLE_BACK_MESSAGE, MB_YESNO);
+
+		if (Ret == IDYES)
+		{
+			GameScene = GAME_SCENE_START;
+
+			return;
+		}
+
+		else if (Ret == IDNO)
+		{
+
+		}
+
+		
+	}
+
 	return;
 }
 
 //プレイ画面の描画
 VOID MY_PLAY_DRAW(VOID)
 {
+
+	DrawBox(0, 0, GAME_WIDTH, GAME_HEIGHT, GetColor(0, 0, 0), TRUE);
 	int image[12];
 
 	
-	LoadDivGraph("IMAGE.\\村娘.png", 12, 3, 4, 18, 48, image);
+	LoadDivGraph("IMAGE.\\村娘.png", 12, 3, 4, 19, 48, image);
 
 	DrawGraph(0, 0, image[1], TRUE);
 
 	
 
+	return;
+}
+
+VOID MY_MENU(VOID)
+{
+	MY_MENU_PROC();
+	MY_MENU_DRAW();
+
+	DrawString(0, 0, "メニュー画面(Nキーを押して下さい)", GetColor(255, 255, 255));
+
+	
+	return;
+}
+
+VOID MY_MENU_PROC(VOID)
+{
+	if (MY_KEY_DOWN(KEY_INPUT_N) == TRUE)
+	{
+		GameScene = GAME_SCENE_PLAY;
+
+		return;
+	}
+
+	return;
+}
+
+VOID MY_MENU_DRAW(VOID)
+{
+	DrawBox(0, 0, GAME_WIDTH, GAME_HEIGHT, GetColor(0, 0, 255), TRUE);
 	return;
 }
 
