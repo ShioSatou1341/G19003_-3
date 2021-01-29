@@ -19,6 +19,8 @@
 
 #define IMAGE_MENU_BK_PATH     ("IMAGE.\\space1.png")
 
+#define IMAGE_BATTLE_BK_PATH   ("IMAGE.\\戦闘画面レイアウト.png")
+
 #define IMAGE_END_BK_PATH      ("IMAGE.\\エンド参考.jpg")
 #define IMAGE_END_PUSH_PATH    ("ImAGE.\\クリアロゴ.png")
 
@@ -56,7 +58,8 @@ enum GAME_SCENE {
 	GAME_SCENE_START,
 	GAME_SCENE_PLAY,
 	GAME_SCENE_MENU,
-	GAME_SCENE_END,
+	GAME_SCENE_BATTLE,
+	GAME_SCENE_END
 };	//ゲームのシーン
 
 enum GAME_CHARA 
@@ -67,6 +70,7 @@ enum GAME_CHARA
 
 
 };
+
 
 //int型のPOINT構造体
 typedef struct STRUCT_I_POINT
@@ -111,7 +115,13 @@ typedef struct STRUCT_CHARA
 	RECT coll;					//当たり判定
 	iPOINT collBeforePt;		//当たる前の座標
 
+	int HP;
+	int ATK;
+	int DEF;
+	//int SPD;
+
 }CHARA;	//キャラクター構造体
+
 
 
 
@@ -132,8 +142,6 @@ MOUSE mouse;
 //ゲーム関連
 int GameScene;		//ゲームシーンを管理
 
-//プレイヤー関連
-CHARA player;		//ゲームのキャラ
 
 //########## プロトタイプ宣言 ##########
 VOID MY_FPS_UPDATE(VOID);			//FPS値を計測、更新する
@@ -163,6 +171,10 @@ VOID MY_MENU(VOID);
 VOID MY_MENU_PROC(VOID);
 VOID MY_MENU_DRAW(VOID);
 
+VOID MY_BATTLE(VOID);
+VOID MY_BATTLE_PROC(VOID);
+VOID MY_BATTLE_DRAW(VOID);
+
 VOID MY_END(VOID);			//エンド画面
 VOID MY_END_PROC(VOID);		//エンド画面の処理
 VOID MY_END_DRAW(VOID);		//エンド画面の描画
@@ -178,6 +190,8 @@ IMAGE ImageTitleROGO;
 IMAGE ImageTitlePUSH;
 
 IMAGE ImageMenuBK;
+
+IMAGE ImageBattleBK;
 
 IMAGE ImageEndBK;
 IMAGE ImageEndPush;
@@ -236,6 +250,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			break;
 		case GAME_SCENE_MENU: 
 			MY_MENU();  //メニュー画面
+			break;
+		case GAME_SCENE_BATTLE:
+			MY_BATTLE();
 			break;
 		case GAME_SCENE_END:
 			MY_END();	//エンド画面
@@ -516,7 +533,6 @@ VOID MY_PLAY(VOID)
 	MY_PLAY_PROC();	//プレイ画面の処理
 	MY_PLAY_DRAW();	//プレイ画面の描画
 
-	DrawString(0, 0, "プレイ画面(スペースキーを押して下さい)", GetColor(255, 255, 255));
 	return;
 }
 
@@ -537,6 +553,11 @@ VOID MY_PLAY_PROC(VOID)
 		GameScene = GAME_SCENE_MENU;
 		
 		return;
+	}
+
+	if (MY_KEY_DOWN(KEY_INPUT_B) == TRUE)
+	{
+		GameScene = GAME_SCENE_BATTLE;
 	}
 
 	if (MY_KEY_DOWN(KEY_INPUT_S) == TRUE)
@@ -566,10 +587,11 @@ VOID MY_PLAY_DRAW(VOID)
 {
 
 	DrawBox(0, 0, GAME_WIDTH, GAME_HEIGHT, GetColor(0, 0, 0), TRUE);
-	int image[12];
+	int image[76];
 
+	DrawString(0, 0, "スタート画面:S,メニュー画面:M,戦闘画面:B,エンド画面:スペース", GetColor(255, 255, 255));
 	
-	LoadDivGraph("IMAGE.\\村娘.png", 12, 3, 4, 19, 48, image);
+	LoadDivGraph("IMAGE.\\村娘.png", 1, 8, 12, 48, 48, image);
 
 	DrawGraph(0, 0, image[1], TRUE);
 
@@ -583,7 +605,7 @@ VOID MY_MENU(VOID)
 	MY_MENU_PROC();
 	MY_MENU_DRAW();
 
-	DrawString(0, 0, "メニュー画面(Nキーを押して下さい)", GetColor(255, 255, 255));
+	
 
 	
 	return;
@@ -603,9 +625,44 @@ VOID MY_MENU_PROC(VOID)
 
 VOID MY_MENU_DRAW(VOID)
 {
-	DrawBox(0, 0, GAME_WIDTH, GAME_HEIGHT, GetColor(0, 0, 255), TRUE);
+	DrawString(0, 0, "メニュー画面(Nキーを押して下さい)", GetColor(255, 255, 255));
+
+	DrawString(GAME_WIDTH / 2, GAME_HEIGHT / 2,"メニュー",GetColor(255, 255, 255));
+	//DrawBox(0, 0, GAME_WIDTH, GAME_HEIGHT, GetColor(0, 0, 255), TRUE);
+
+
 	return;
 }
+
+VOID MY_BATTLE(VOID)
+{
+	MY_BATTLE_PROC();
+	MY_BATTLE_DRAW();
+
+	return;
+}
+
+VOID MY_BATTLE_PROC(VOID)
+{
+	if (MY_KEY_DOWN(KEY_INPUT_V) == TRUE)
+	{
+		GameScene = GAME_SCENE_PLAY;
+	}
+
+
+
+	return;
+}
+
+VOID MY_BATTLE_DRAW(VOID)
+{
+	DrawString(0, 0, "戦闘画面Vキーを押して下さい)", GetColor(255, 255, 255));
+
+	DrawGraph(ImageBattleBK.x, ImageBattleBK.y, ImageBattleBK.handle, TRUE);
+
+	return;
+}
+
 
 //エンド画面
 VOID MY_END(VOID)
@@ -673,8 +730,18 @@ BOOL MY_LOAD_IMAGE(VOID)
 
 	GetGraphSize(ImageTitlePUSH.handle, &ImageTitlePUSH.width, &ImageTitlePUSH.height);
 	ImageTitlePUSH.x = GAME_WIDTH / 2 - ImageTitlePUSH.width / 2;
-	ImageTitlePUSH.y = GAME_HEIGHT / 2 - ImageTitlePUSH.height / 2;
+	ImageTitlePUSH.y = GAME_HEIGHT / 3 - ImageTitlePUSH.height / 3;
 
+	strcpy(ImageBattleBK.path, IMAGE_BATTLE_BK_PATH);
+	ImageBattleBK.handle = LoadGraph(ImageBattleBK.path);
+	if (ImageBattleBK.handle == -1)
+	{
+		MessageBox(GetMainWindowHandle(), IMAGE_BATTLE_BK_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	}
+
+	GetGraphSize(ImageBattleBK.handle, &ImageBattleBK.width, &ImageBattleBK.height);
+	ImageBattleBK.x = GAME_WIDTH / 2 - ImageBattleBK.width / 2;
+	ImageBattleBK.y = GAME_HEIGHT / 2 - ImageBattleBK.height / 2;
 	
 
 	strcpy(ImageEndBK.path, IMAGE_END_BK_PATH);
