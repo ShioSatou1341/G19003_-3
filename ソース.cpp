@@ -9,24 +9,33 @@
 #define GAME_WINDOW_BAR		0					//タイトルバーはデフォルトにする
 #define GAME_WINDOW_NAME	"GAME TITLE"		//ウィンドウのタイトル
 
-#define GAME_FPS			60	//FPSの数値	
+#define GAME_FPS			    60	//FPSの数値	
 
 #define IMAGE_TITLE_BK_PATH    ("IMAGE.\\タイトル背景参考.png")
 #define IMAGE_TITLE_ROGO_PATH  ("IMAGE.\\Dissapeared.png")
 #define IMAGE_TITLE_PUSH_PATH  ("IMAGE.\\タイトルpush.png")
 
-#define IMAGE_PLAY_MAP_PATH
+#define IMAGE_PLAY_MAP_PATH    ("IMAGE.\\map3.png")
+#define GAME_MAP_TATE_MAX     19
+#define GAME_MAP_YOKO_MAX     25
+#define GAME_MAP_KIND         1
 
 #define IMAGE_MENU_BK_PATH     ("IMAGE.\\space1.png")
 
 #define IMAGE_BATTLE_BK_PATH   ("IMAGE.\\戦闘画面レイアウト.png")
 
-#define IMAGE_END_BK_PATH      ("IMAGE.\\エンド参考.jpg")
-#define IMAGE_END_PUSH_PATH    ("ImAGE.\\クリアロゴ.png")
+#define IMAGE_END_BK_PATH      ("IMAGE.\\エンド背景.png")
+#define IMAGE_END_PUSH_PATH    ("IMAGE.\\エンド背景.png")
 
-#define IMAGE_MAP_PATH         ("IMAGE.\\space.png")
+//#define MAP_DIV_WIDTH		48
+//#define MAP_DIV_HEIGHT		48
+//#define MAP_DIV_TATE		19
+//#define MAP_DIV_YOKO		25
+//#define MAP_DIV_NUM	MAP_DIV_TATE * MAP_DIV_YOKO
 
-#define IMAGE_CHARA            ("IMAGE.\\村娘.png")
+#define IMAGE_PLAYER_PATH            ("IMAGE.\\村娘.png")
+
+#define IMAGE_ENEMY_PATH             ("IMAGE.\\九尾2.png")
 
 //マウスのボタン
 #define MOUSE_BUTTON_CODE	129	//0x0000～0x0080まで
@@ -71,6 +80,11 @@ enum GAME_CHARA
 
 };
 
+enum CHARA_SPEED {
+	CHARA_SPEED_LOW = 1,
+	CHARA_SPEED_MIDI = 2,
+	CHARA_SPEED_HIGH = 3
+};
 
 //int型のPOINT構造体
 typedef struct STRUCT_I_POINT
@@ -109,20 +123,42 @@ typedef struct STRUCT_MUSIC
 
 typedef struct STRUCT_CHARA
 {
-	IMAGE image;				//IMAGE構造体
-	int speed;					//速さ
+	IMAGE image;
+	int speed;
+	int CenterX;
+	int CenterY;
 
-	RECT coll;					//当たり判定
-	iPOINT collBeforePt;		//当たる前の座標
+	int Kaiso;
+	int Muki;		//0：上　1：右　2：下　3：左
 
-	int HP;
-	int ATK;
-	int DEF;
-	//int SPD;
+	int SeCou = 0;
 
-}CHARA;	//キャラクター構造体
+	BOOL CanShot;
+	int ShotReLoadCnt;
+	int ShotReLoadCntMAX;
 
+	
 
+	RECT coll;
+}CHARA;
+
+//typedef struct STRUCT_MAP
+//{
+//	GAME_MAP_KIND kind;			//マップの種類
+//	int x;						//X位置
+//	int y;						//Y位置
+//	int width;					//幅
+//	int height;					//高さ
+//}MAP;	//MAP構造体
+
+//typedef struct STRUCT_MAP_IMAGE
+//{
+//	char path[PATH_MAX];
+//	int handle[MAP_DIV_NUM];
+//	int kind[MAP_DIV_NUM];
+//	int width;
+//	int height;
+//}MAPCHIP;
 
 
 //########## グローバル変数 ##########
@@ -184,17 +220,28 @@ VOID MY_DELETE_IMAGE(VOID);		//画像をまとめて削除する関数
 
 BOOL MY_LOAD_MUSIC(VOID);		//音楽をまとめて読み込む関数
 VOID MY_DELETE_MUSIC(VOID);		//音楽をまとめて削除する関数
+//CHARA player;
 
 IMAGE ImageTitleBK;
 IMAGE ImageTitleROGO;
 IMAGE ImageTitlePUSH;
 
+IMAGE ImageMapBK;
+
+//MAPCHIP mapChip;
+
+//MAP map[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX];
+
 IMAGE ImageMenuBK;
 
 IMAGE ImageBattleBK;
+IMAGE ImageEnemy;
 
 IMAGE ImageEndBK;
 IMAGE ImageEndPush;
+
+int DrawX = 0;	//表示位置X
+int DrawY = 0;	//表示位置Y
 
 //########## プログラムで最初に実行される関数 ##########
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
@@ -247,8 +294,29 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			break;
 		case GAME_SCENE_PLAY:
 			MY_PLAY();	//プレイ画面
+			
+			int image[76];
+
+			LoadDivGraph("IMAGE.\\村娘.png", 48, 8, 12, 48, 48, image);
+
+			DrawGraph(DrawX, DrawY, image[0], TRUE);      // 画像を表示
+
+			
+			if (MY_KEY_DOWN(KEY_INPUT_UP) == TRUE) {
+				DrawY--; DrawGraph(DrawX, DrawY, image[0], TRUE);
+			}
+			if (MY_KEY_DOWN(KEY_INPUT_DOWN) == TRUE) {
+				DrawY++; DrawGraph(DrawX, DrawY, image[50], TRUE);
+			}
+			if (MY_KEY_DOWN(KEY_INPUT_LEFT) == TRUE) {
+				DrawX--; DrawGraph(DrawX, DrawY, image[13], TRUE);
+			}
+			if (MY_KEY_DOWN(KEY_INPUT_RIGHT) == TRUE) {
+				DrawX++; DrawGraph(DrawX, DrawY, image[13], TRUE);
+			}
+
 			break;
-		case GAME_SCENE_MENU: 
+		case GAME_SCENE_MENU:
 			MY_MENU();  //メニュー画面
 			break;
 		case GAME_SCENE_BATTLE:
@@ -264,6 +332,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		ScreenFlip();		//モニタのリフレッシュレートの速さで裏画面を再描画
 
 		MY_FPS_WAIT();		//FPSの処理[待つ]
+
+		
+
 	}
 
 	//画像ハンドルを破棄
@@ -550,34 +621,30 @@ VOID MY_PLAY_PROC(VOID)
 
 	if (MY_KEY_DOWN(KEY_INPUT_M) == TRUE)
 	{
+		//ゲームのシーンをメニュー画面にする
 		GameScene = GAME_SCENE_MENU;
-		
+
 		return;
 	}
 
 	if (MY_KEY_DOWN(KEY_INPUT_B) == TRUE)
 	{
+		//ゲームのシーンを戦闘画面にする
 		GameScene = GAME_SCENE_BATTLE;
+
+		return;
 	}
 
 	if (MY_KEY_DOWN(KEY_INPUT_S) == TRUE)
 	{
-		int Ret = MessageBox(GetMainWindowHandle(), MSG_TITLE_BACK, MSG_TITLE_BACK_MESSAGE, MB_YESNO);
+		//ゲームのシーンをスタート画面にする
+		GameScene = GAME_SCENE_START;
 
-		if (Ret == IDYES)
-		{
-			GameScene = GAME_SCENE_START;
-
-			return;
-		}
-
-		else if (Ret == IDNO)
-		{
-
-		}
-
-		
+		return;
 	}
+	
+	
+	
 
 	return;
 }
@@ -585,15 +652,14 @@ VOID MY_PLAY_PROC(VOID)
 //プレイ画面の描画
 VOID MY_PLAY_DRAW(VOID)
 {
-
-	DrawBox(0, 0, GAME_WIDTH, GAME_HEIGHT, GetColor(0, 0, 0), TRUE);
-	int image[76];
-
-	DrawString(0, 0, "スタート画面:S,メニュー画面:M,戦闘画面:B,エンド画面:スペース", GetColor(255, 255, 255));
 	
-	LoadDivGraph("IMAGE.\\村娘.png", 1, 8, 12, 48, 48, image);
 
-	DrawGraph(0, 0, image[1], TRUE);
+	DrawString(0, 0, "スタート画面:S,メニュー画面:M,戦闘画面:B,エンド画面:スペース", GetColor(0, 0, 0));
+
+	
+
+	DrawGraph(ImageMapBK.x, ImageMapBK.y, ImageMapBK.handle, TRUE);
+
 
 	
 
@@ -660,6 +726,8 @@ VOID MY_BATTLE_DRAW(VOID)
 
 	DrawGraph(ImageBattleBK.x, ImageBattleBK.y, ImageBattleBK.handle, TRUE);
 
+	DrawGraph(ImageEnemy.x, ImageEnemy.y, ImageEnemy.handle, TRUE);
+
 	return;
 }
 
@@ -721,17 +789,17 @@ BOOL MY_LOAD_IMAGE(VOID)
 	ImageTitleROGO.x = GAME_WIDTH / 2 - ImageTitleROGO.width / 2;
 	ImageTitleROGO.y = GAME_HEIGHT / 2 - ImageTitleROGO.height / 2;
 
-	strcpy(ImageTitlePUSH.path, IMAGE_TITLE_PUSH_PATH);
-	ImageTitlePUSH.handle = LoadGraph(ImageTitlePUSH.path);
-	if (ImageTitlePUSH.handle == -1)
+	strcpy(ImageMapBK.path, IMAGE_PLAY_MAP_PATH);
+	ImageMapBK.handle = LoadGraph(ImageMapBK.path);
+	if (ImageMapBK.handle == -1)
 	{
-		MessageBox(GetMainWindowHandle(), IMAGE_TITLE_PUSH_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+		MessageBox(GetMainWindowHandle(), IMAGE_PLAY_MAP_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
 	}
 
-	GetGraphSize(ImageTitlePUSH.handle, &ImageTitlePUSH.width, &ImageTitlePUSH.height);
-	ImageTitlePUSH.x = GAME_WIDTH / 2 - ImageTitlePUSH.width / 2;
-	ImageTitlePUSH.y = GAME_HEIGHT / 3 - ImageTitlePUSH.height / 3;
-
+	GetGraphSize(ImageMapBK.handle, &ImageMapBK.width, &ImageMapBK.height);
+	ImageMapBK.x = GAME_WIDTH / 2 - ImageMapBK.width / 2;
+	ImageMapBK.y = GAME_HEIGHT / 3 - ImageMapBK.height / 3;
+	
 	strcpy(ImageBattleBK.path, IMAGE_BATTLE_BK_PATH);
 	ImageBattleBK.handle = LoadGraph(ImageBattleBK.path);
 	if (ImageBattleBK.handle == -1)
@@ -739,9 +807,20 @@ BOOL MY_LOAD_IMAGE(VOID)
 		MessageBox(GetMainWindowHandle(), IMAGE_BATTLE_BK_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
 	}
 
-	GetGraphSize(ImageBattleBK.handle, &ImageBattleBK.width, &ImageBattleBK.height);
-	ImageBattleBK.x = GAME_WIDTH / 2 - ImageBattleBK.width / 2;
-	ImageBattleBK.y = GAME_HEIGHT / 2 - ImageBattleBK.height / 2;
+	GetGraphSize(ImageEnemy.handle, &ImageEnemy.width, &ImageEnemy.height);
+	ImageEnemy.x = GAME_WIDTH / 2 - ImageEnemy.width / 2;
+	ImageEnemy.y = GAME_HEIGHT / 2 - ImageEnemy.height / 2;
+
+	strcpy(ImageEnemy.path, IMAGE_ENEMY_PATH);
+	ImageEnemy.handle = LoadGraph(ImageEnemy.path);
+	if (ImageEnemy.handle == -1)
+	{
+		MessageBox(GetMainWindowHandle(), IMAGE_ENEMY_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	}
+
+	GetGraphSize(ImageEnemy.handle, &ImageEnemy.width, &ImageEnemy.height);
+	ImageEnemy.x = GAME_WIDTH / 2 - ImageEnemy.width / 2;
+	ImageEnemy.y = GAME_HEIGHT / 2 - ImageEnemy.height / 2;
 	
 
 	strcpy(ImageEndBK.path, IMAGE_END_BK_PATH);
